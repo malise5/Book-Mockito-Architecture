@@ -18,6 +18,7 @@ import static com.dev.book.TestData.testBookEntity;
 import javax.swing.Spring;
 
 import com.dev.book.dto.BookDto;
+import com.dev.book.service.BookService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
@@ -27,6 +28,9 @@ public class BookControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private BookService bookService;
 
     @Test
     public void testThatBookIsCreated() throws Exception{
@@ -43,6 +47,23 @@ public class BookControllerIT {
                 .andExpect(MockMvcResultMatchers.status().isCreated());
 
     }
+
+    @Test
+    public void testThatBookIsNotFoundReturns404() throws Exception{
+        mockMvc.perform(MockMvcRequestBuilders.get("/v1/api/books/12365478"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+
+    }
+
+    @Test
+    public void testThatReturnsHttp200IfBookExists() throws Exception{
+        final BookDto bookDto = testBookDto();
+        bookService.createBook(bookDto);
+        mockMvc.perform(MockMvcRequestBuilders.get("/v1/api/books/" + bookDto.getIsbn()))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+
+    }
+
 
     
 }
